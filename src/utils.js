@@ -63,7 +63,20 @@ exports.generateHash = (senha) => bcrypt.hashSync(senha, saltRounds);
 exports.compareHash = (senha, hash) => bcrypt.compare(senha, hash);
 
 exports.sanitizeEmpresa = (empresa) => {
-  console.log(empresa.horario_comercial)
   empresa.horario_comercial = JSON.parse(empresa.horario_comercial)
   return empresa
 }
+
+exports.getPagination = (page, size) => {
+  const limit = size ? +size : 20;
+  const offset = page ? page * limit : 0;
+  return { limit, offset };
+};
+exports.getPaginatedData = (data, page, limit) => {
+  const { count: totalItems, rows: items } = data;
+  const currentPage = page ? +page : 0;
+  const totalPages = Math.ceil(totalItems / limit);
+
+  return { totalItems, items, totalPages, currentPage };
+};
+

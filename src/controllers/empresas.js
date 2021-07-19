@@ -1,6 +1,6 @@
 const Empresa = require("../models/empresa");
 const status = require("http-status");
-const { sanitizeEmpresa } = require("../utils");
+const { sanitizeEmpresa, getPagination, getPaginatedData } = require("../utils");
 
 exports.Insert = (req, res, next) => {
   const data = req.body;
@@ -19,10 +19,13 @@ exports.Insert = (req, res, next) => {
 };
 
 exports.SearchAll = (req, res, next) => {
-  Empresa.findAll()
-    .then((empresa) => {
-      if (empresa) {
-        res.status(status.OK).send(empresa.map((item) => sanitizeEmpresa(item)));
+  const { page = 0, size = 20 } = req.query;
+  const { limit, offset } = getPagination(page, size);
+  Empresa.findAndCountAll({ limit, offset })
+    .then((data) => {
+      if (data) {
+        data.rows = data.rows.map((item) => sanitizeEmpresa(item))
+        res.status(status.OK).send(getPaginatedData(data, page, limit));
       }
     })
     .catch((error) => next(error));
