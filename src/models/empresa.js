@@ -10,43 +10,56 @@ const Empresa = sequelize.define("empresa", {
   },
   nome: {
     allowNull: false,
-    type: Sequelize.STRING
+    type: Sequelize.STRING,
   },
   tipo: {
     allowNull: false,
-    type: Sequelize.STRING
+    type: Sequelize.STRING,
   },
   pacote: {
     allowNull: false,
-    type: Sequelize.STRING
+    type: Sequelize.STRING,
   },
   descricao: {
     allowNull: false,
-    type: Sequelize.STRING
+    type: Sequelize.STRING,
   },
   endereco: {
     allowNull: false,
-    type: Sequelize.STRING
+    type: Sequelize.STRING,
   },
   contacto: {
     allowNull: false,
-    type: Sequelize.STRING
+    type: Sequelize.STRING,
+  },
+  ativo: {
+    allowNull: false,
+    type: Sequelize.BOOLEAN,
+    defaultValue: false,
   },
   email: {
     allowNull: false,
-    type: Sequelize.STRING
+    type: Sequelize.STRING,
   },
   website: {
     allowNull: false,
-    type: Sequelize.STRING
+    type: Sequelize.STRING,
   },
   tempo_minimo: {
     allowNull: false,
-    type: Sequelize.STRING
+    type: Sequelize.STRING,
   },
-  documento: {
+  horario_comercial: {
     allowNull: false,
-    type: Sequelize.STRING
+    type: Sequelize.TEXT,
+  },
+  documentoId: {
+    allowNull: false,
+    type: Sequelize.INTEGER,
+  },
+  logotipoId: {
+    allowNull: false,
+    type: Sequelize.INTEGER,
   },
 });
 

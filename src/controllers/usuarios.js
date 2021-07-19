@@ -1,8 +1,11 @@
 const Usuario = require("../models/usuario");
 const status = require("http-status");
+const { generateHash } = require("../utils");
 
 exports.Insert = (req, res, next) => {
-  Usuario.create(req.body)
+  const usuario = req.body;
+  usuario.senha = generateHash(usuario.senha);
+  Usuario.create(usuario)
     .then((usuario) => {
       if (usuario) {
         res.status(status.OK).send(usuario);
@@ -43,12 +46,9 @@ exports.Update = (req, res, next) => {
     .then((usuario) => {
       if (usuario) {
         usuario
-          .update(
-            req.body,
-            {
-              where: { id },
-            }
-          )
+          .update(req.body, {
+            where: { id },
+          })
           .then(() => {
             res.status(status.OK).send();
           })

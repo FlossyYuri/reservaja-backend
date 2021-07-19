@@ -1,7 +1,12 @@
 const Empresa = require("../models/empresa");
 const status = require("http-status");
+const { sanitizeEmpresa } = require("../utils");
 
 exports.Insert = (req, res, next) => {
+  const data = req.body;
+  data.ativo = false;
+  data.usuarioId = req.user.id;
+  data.horario_comercial = JSON.stringify(data.horario_comercial)
   Empresa.create(req.body)
     .then((empresa) => {
       if (empresa) {
@@ -17,7 +22,7 @@ exports.SearchAll = (req, res, next) => {
   Empresa.findAll()
     .then((empresa) => {
       if (empresa) {
-        res.status(status.OK).send(empresa);
+        res.status(status.OK).send(empresa.map((item) => sanitizeEmpresa(item)));
       }
     })
     .catch((error) => next(error));
@@ -28,7 +33,7 @@ exports.SearchOne = (req, res, next) => {
   Empresa.findByPk(id)
     .then((empresa) => {
       if (empresa) {
-        res.status(status.OK).send(empresa);
+        res.status(status.OK).send(sanitizeEmpresa(empresa));
       } else {
         res.status(status.NOT_FOUND).send();
       }

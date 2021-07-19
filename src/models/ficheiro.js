@@ -1,7 +1,7 @@
 const Sequelize = require("sequelize");
 const sequelize = require("../database/database");
 
-const Usuario = sequelize.define("usuario", {
+const Ficheiro = sequelize.define("ficheiro", {
   id: {
     allowNull: false,
     autoIncrement: true,
@@ -11,31 +11,23 @@ const Usuario = sequelize.define("usuario", {
   nome: {
     allowNull: false,
     type: Sequelize.STRING,
-    validate: {
-      len: [3, 100],
-    },
   },
-  email: {
+  ficheiro: {
     allowNull: false,
     type: Sequelize.STRING,
   },
-  contacto: {
+  tipo: {
     allowNull: false,
     type: Sequelize.STRING,
   },
-  senha: {
+  rota: {
     allowNull: false,
     type: Sequelize.STRING,
   },
-  funcao: {
+  tamanho: {
     allowNull: false,
-    type: Sequelize.STRING,
-  },
-  ativo: {
-    allowNull: false,
-    type: Sequelize.BOOLEAN,
-    defaultValue: true,
+    type: Sequelize.INTEGER,
   },
 });
 
-module.exports = Usuario;
+module.exports = Ficheiro;
