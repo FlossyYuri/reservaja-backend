@@ -32,10 +32,18 @@ const Empresa = sequelize.define("empresa", {
     allowNull: false,
     type: Sequelize.STRING,
   },
-  ativo: {
+  aprovado: {
     allowNull: false,
     type: Sequelize.BOOLEAN,
     defaultValue: false,
+  },
+  expiracaoTrial: {
+    allowNull: false,
+    type: Sequelize.DATE,
+  },
+  expiracaoPagamento: {
+    allowNull: false,
+    type: Sequelize.DATE,
   },
   email: {
     allowNull: false,

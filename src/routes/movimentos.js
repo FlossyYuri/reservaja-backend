@@ -3,7 +3,6 @@ const router = express.Router();
 const MovimentoController = require("../controllers/movimentos");
 const { authenticateToken, isAdmin } = require("../utils");
 
-router.post("/", MovimentoController.Insert);
 router.get("/notificacoes", authenticateToken, isAdmin, MovimentoController.SearchNotifications);
 router.get("/transacoes", authenticateToken, isAdmin, MovimentoController.SearchTransactions);
 router.get("/", authenticateToken, isAdmin, MovimentoController.SearchAll);

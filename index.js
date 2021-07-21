@@ -6,10 +6,21 @@ const status = require("http-status");
 const sequelize = require("./src/database/database");
 const Empresa = require("./src/models/empresa");
 const Usuario = require("./src/models/usuario");
+const Movimento = require("./src/models/movimento");
 const app = express();
 const routes = require("./src/routes");
 
 Usuario.hasMany(Empresa);
+Usuario.hasMany(Movimento, {
+  foreignKey: {
+    allowNull: true
+  }
+});
+Empresa.hasMany(Movimento, {
+  foreignKey: {
+    allowNull: true
+  }
+});
 dotenv.config();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

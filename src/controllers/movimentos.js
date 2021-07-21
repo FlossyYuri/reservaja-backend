@@ -2,10 +2,10 @@ const Movimento = require("../models/movimento");
 const status = require("http-status");
 const { fetchPaginatedData } = require("../utils");
 
-exports.Insert = (tipo, descricao, idUsuario, idEmpresa) => new Promise((resolve, reject) => {
-  const movimento = { tipo, descricao, idUsuario, respondida: false }
-  if (idEmpresa)
-    movimento.idEmpresa = idEmpresa
+exports.Insert = (tipo, descricao, usuarioId, empresaId) => new Promise((resolve, reject) => {
+  const movimento = { tipo, descricao, usuarioId, respondida: false }
+  if (empresaId)
+    movimento.empresaId = empresaId
   Movimento.create(movimento)
     .then((movimento) => {
       if (movimento) {

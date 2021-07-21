@@ -1,9 +1,10 @@
 const Usuario = require("../models/usuario");
 const status = require("http-status");
-const { generateHash } = require("../utils");
+const { generateHash, fetchPaginatedData } = require("../utils");
 
 exports.Insert = (req, res, next) => {
   const usuario = req.body;
+  usuario.ativo = 1;
   usuario.senha = generateHash(usuario.senha);
   Usuario.create(usuario)
     .then((usuario) => {
@@ -17,13 +18,7 @@ exports.Insert = (req, res, next) => {
 };
 
 exports.SearchAll = (req, res, next) => {
-  Usuario.findAll()
-    .then((usuario) => {
-      if (usuario) {
-        res.status(status.OK).send(usuario);
-      }
-    })
-    .catch((error) => next(error));
+  fetchPaginatedData(req, res, Usuario)
 };
 exports.SearchOne = (req, res, next) => {
   const id = req.params.id;
