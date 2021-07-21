@@ -9,8 +9,8 @@ exports.Insert = (req, res) => {
   data.aprovado = false;
   data.usuarioId = req.user.id;
   data.horario_comercial = JSON.stringify(data.horario_comercial)
-  data.expiracaoTrial = new Date().toJSON()
-  data.expiracaoPagamento = new Date().toJSON()
+  data.expiracaoTrial = null
+  data.expiracaoPagamento = null
   Empresa.create(req.body)
     .then((empresa) => {
       if (empresa) {
@@ -73,10 +73,26 @@ exports.Update = (req, res) => {
   }).catch((err => defaultErrorHandler(res, err)))
 };
 
+exports.Aprovar = (req, res) => {
+  updateRow(req, res, Empresa, cloneObject(
+    { aprovado: 1 })
+  ).then((empresa) => {
+    if (typeof empresa === 'string') res.status(status.NOT_FOUND).send();
+    else {
+      res.status(status.NO_CONTENT).send();
+      Movimentos.Insert(
+        'aprovar-empresa',
+        `${req.user.nome} aprovou o contrato com a ${empresa.nome}`,
+        req.user.id, empresa.id
+      )
+    }
+  }).catch((err => defaultErrorHandler(res, err)))
+};
+
 exports.Add1MonthTrial = (req, res) => {
   getRow(req, res, Empresa).then((data) => {
     const now = new Date()
-    const expiracaoTrial = new Date(data.expiracaoTrial)
+    const expiracaoTrial = new Date(data.expiracaoTrial || '')
     if (expiracaoTrial < now) {
       expiracaoTrial.setDate(now.getDate() + 30)
     } else {
@@ -101,7 +117,7 @@ exports.Add1MonthTrial = (req, res) => {
 exports.Add1MonthPayment = (req, res) => {
   getRow(req, res, Empresa).then((data) => {
     const now = new Date()
-    const expiracaoPagamento = new Date(data.expiracaoPagamento)
+    const expiracaoPagamento = new Date(data.expiracaoPagamento || '')
     if (expiracaoPagamento < now) {
       expiracaoPagamento.setDate(now.getDate() + 30)
     } else {

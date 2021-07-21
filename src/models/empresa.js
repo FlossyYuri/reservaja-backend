@@ -38,11 +38,11 @@ const Empresa = sequelize.define("empresa", {
     defaultValue: false,
   },
   expiracaoTrial: {
-    allowNull: false,
+    allowNull: true,
     type: Sequelize.DATE,
   },
   expiracaoPagamento: {
-    allowNull: false,
+    allowNull: true,
     type: Sequelize.DATE,
   },
   email: {
