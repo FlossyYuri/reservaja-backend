@@ -1,10 +1,10 @@
 const Empresa = require("../models/empresa");
 const status = require("http-status");
-const { sanitizeEmpresa, fetchPaginatedData, updateRow, cloneObject, getRow } = require("../utils");
+const { sanitizeEmpresa, fetchPaginatedData, updateRow, cloneObject, getRow, defaultErrorHandler } = require("../utils");
 const { Op } = require("sequelize");
 const Movimentos = require("../controllers/movimentos");
 
-exports.Insert = (req, res, next) => {
+exports.Insert = (req, res) => {
   const data = req.body;
   data.aprovado = false;
   data.usuarioId = req.user.id;
@@ -26,8 +26,8 @@ exports.Insert = (req, res, next) => {
     })
     .catch((error) => next(error));
 };
-exports.SearchAll = (req, res, next) => {
-  const { nome, tipo, pacote, ativo } = req.query;
+exports.SearchAll = (req, res) => {
+  const { nome, tipo, pacote, aprovado } = req.query;
 
   const where = {}
   if (req.user.funcao === 'vendedor') {
@@ -38,11 +38,8 @@ exports.SearchAll = (req, res, next) => {
       [Op.substring]: nome
     }
   }
-  if (ativo) {
-    if (ativo === 'true')
-      where.ativo = 1
-    if (ativo === 'false')
-      where.ativo = 0
+  if (aprovado) {
+    where.aprovado = aprovado
   }
   if (tipo) {
     where.tipo = tipo
@@ -52,7 +49,7 @@ exports.SearchAll = (req, res, next) => {
   }
   fetchPaginatedData(req, res, Empresa, where, sanitizeEmpresa)
 };
-exports.SearchOne = (req, res, next) => {
+exports.SearchOne = (req, res) => {
   const id = req.params.id;
 
   Empresa.findByPk(id)
@@ -63,7 +60,7 @@ exports.SearchOne = (req, res, next) => {
         res.status(status.NOT_FOUND).send();
       }
     })
-    .catch((error) => next(error));
+    .catch((error) => defaultErrorHandler(res, error));
 };
 
 exports.Update = (req, res) => {
@@ -73,7 +70,7 @@ exports.Update = (req, res) => {
   ).then((data) => {
     if (typeof data === 'string') res.status(status.NOT_FOUND).send();
     else res.status(status.OK).send(data);
-  }).catch((err => res.status(500).send(err)))
+  }).catch((err => defaultErrorHandler(res, err)))
 };
 
 exports.Add1MonthTrial = (req, res) => {
@@ -97,7 +94,7 @@ exports.Add1MonthTrial = (req, res) => {
           )
         }
 
-      }).catch((err => res.status(500).send(err)))
+      }).catch((err => defaultErrorHandler(res, err)))
   })
 };
 
@@ -122,11 +119,11 @@ exports.Add1MonthPayment = (req, res) => {
           )
         }
 
-      }).catch((err => res.status(500).send(err)))
+      }).catch((err => defaultErrorHandler(res, err)))
   })
 };
 
-exports.Delete = (req, res, next) => {
+exports.Delete = (req, res) => {
   const { id } = req.params;
   Empresa.findByPk(id)
     .then((empresa) => {
@@ -143,5 +140,5 @@ exports.Delete = (req, res, next) => {
         res.status(status.NOT_FOUND).send();
       }
     })
-    .catch((error) => next(error));
+    .catch((error) => defaultErrorHandler(res, error));
 };

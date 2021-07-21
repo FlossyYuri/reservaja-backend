@@ -1,8 +1,9 @@
 const Usuario = require("../models/usuario");
 const status = require("http-status");
-const { generateHash, fetchPaginatedData } = require("../utils");
+const { generateHash, fetchPaginatedData, defaultErrorHandler } = require("../utils");
+const { Op } = require("sequelize");
 
-exports.Insert = (req, res, next) => {
+exports.Insert = (req, res) => {
   const usuario = req.body;
   usuario.ativo = 1;
   usuario.senha = generateHash(usuario.senha);
@@ -14,13 +15,27 @@ exports.Insert = (req, res, next) => {
         res.status(status.NOT_FOUND).send();
       }
     })
-    .catch((error) => next(error));
+    .catch((error) => defaultErrorHandler(res, error));
 };
 
-exports.SearchAll = (req, res, next) => {
-  fetchPaginatedData(req, res, Usuario)
+exports.SearchAll = (req, res) => {
+  const { nome, funcao, ativo } = req.query;
+
+  const where = {}
+  if (nome) {
+    where.nome = {
+      [Op.substring]: nome
+    }
+  }
+  if (ativo) {
+    where.ativo = ativo
+  }
+  if (funcao) {
+    where.funcao = funcao
+  }
+  fetchPaginatedData(req, res, Usuario, where)
 };
-exports.SearchOne = (req, res, next) => {
+exports.SearchOne = (req, res) => {
   const id = req.params.id;
 
   Usuario.findByPk(id)
@@ -31,10 +46,10 @@ exports.SearchOne = (req, res, next) => {
         res.status(status.NOT_FOUND).send();
       }
     })
-    .catch((error) => next(error));
+    .catch((error) => defaultErrorHandler(res, error));
 };
 
-exports.Update = (req, res, next) => {
+exports.Update = (req, res) => {
   const id = req.params.id;
 
   Usuario.findByPk(id)
@@ -47,15 +62,15 @@ exports.Update = (req, res, next) => {
           .then(() => {
             res.status(status.OK).send();
           })
-          .catch((error) => next(error));
+          .catch((error) => defaultErrorHandler(res, error));
       } else {
         res.status(status.NOT_FOUND).send();
       }
     })
-    .catch((error) => next(error));
+    .catch((error) => defaultErrorHandler(res, error));
 };
 
-exports.Delete = (req, res, next) => {
+exports.Delete = (req, res) => {
   const { id } = req.params;
   Usuario.findByPk(id)
     .then((usuario) => {
@@ -67,10 +82,10 @@ exports.Delete = (req, res, next) => {
           .then(() => {
             res.status(status.OK).send();
           })
-          .catch((error) => next(error));
+          .catch((error) => defaultErrorHandler(res, error));
       } else {
         res.status(status.NOT_FOUND).send();
       }
     })
-    .catch((error) => next(error));
+    .catch((error) => defaultErrorHandler(res, error));
 };

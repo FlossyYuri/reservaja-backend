@@ -1,12 +1,13 @@
 const Ficheiro = require("../models/ficheiro");
 const status = require("http-status");
+const { defaultErrorHandler } = require("../utils");
 
-exports.Upload = (req, res, next) => {
+exports.Upload = (req, res) => {
   const file = req.file;
   if (!file) {
     const error = new Error("Please upload a file");
     error.httpStatusCode = 400;
-    return next(error);
+    return defaultErrorHandler(res, error);
   }
   const {
     filename: ficheiro,
@@ -25,9 +26,9 @@ exports.Upload = (req, res, next) => {
         res.status(status.NOT_FOUND).send();
       }
     })
-    .catch((error) => next(error));
+    .catch((error) => defaultErrorHandler(res, error));
 };
-exports.GET = (req, res, next) => {
+exports.GET = (req, res) => {
   const id = req.params.id;
   Ficheiro.findByPk(id)
     .then((ficheiro) => {
@@ -38,9 +39,9 @@ exports.GET = (req, res, next) => {
         res.status(status.NOT_FOUND).send();
       }
     })
-    .catch((error) => next(error));
+    .catch((error) => defaultErrorHandler(res, error));
 };
-exports.Download = (req, res, next) => {
+exports.Download = (req, res) => {
   const id = req.params.id;
   Ficheiro.findByPk(id)
     .then((ficheiro) => {
@@ -51,5 +52,5 @@ exports.Download = (req, res, next) => {
         res.status(status.NOT_FOUND).send();
       }
     })
-    .catch((error) => next(error));
+    .catch((error) => defaultErrorHandler(res, error));
 };

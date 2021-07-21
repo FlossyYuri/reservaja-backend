@@ -91,10 +91,7 @@ exports.fetchPaginatedData = (req, res, Model, where = {}, sanitizer) => {
         res.status(status.OK).send(this.getPaginatedData(data, page, limit));
       }
     })
-    .catch((error) => {
-      console.log(error)
-      res.status(status.INTERNAL_SERVER_ERROR).send()
-    });
+    .catch((error) => this.defaultErrorHandler(res, error));
 }
 
 exports.updateRow = (req, res, Model, body, incomeId) => new Promise((resolve, reject) => {
@@ -130,3 +127,8 @@ exports.getRow = (req, res, Model, incomeId) => new Promise((resolve, reject) =>
 
 exports.cloneObject = (data = {}) => JSON.parse(JSON.stringify(data))
 exports.addDays = (date, days) => date.setDate(date.getDate() + days)
+
+exports.defaultErrorHandler = (res, error) => {
+  console.log(error)
+  res.status(status.INTERNAL_SERVER_ERROR).send()
+}

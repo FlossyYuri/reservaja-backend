@@ -1,6 +1,6 @@
 const Movimento = require("../models/movimento");
 const status = require("http-status");
-const { fetchPaginatedData } = require("../utils");
+const { fetchPaginatedData, defaultErrorHandler } = require("../utils");
 
 exports.Insert = (tipo, descricao, usuarioId, empresaId) => new Promise((resolve, reject) => {
   const movimento = { tipo, descricao, usuarioId, respondida: false }
@@ -30,7 +30,7 @@ exports.SearchNotifications = (req, res) => {
   const where = { tipo: "cadastrar-empresa" }
   fetchPaginatedData(req, res, Movimento, where)
 };
-exports.SearchOne = (req, res, next) => {
+exports.SearchOne = (req, res) => {
   const { id } = req.params;
 
   Movimento.findByPk(id)
@@ -41,31 +41,10 @@ exports.SearchOne = (req, res, next) => {
         res.status(status.NOT_FOUND).send();
       }
     })
-    .catch((error) => next(error));
+    .catch((error) => defaultErrorHandler(res, error));
 };
 
-exports.Update = (req, res, next) => {
-  const { id } = req.params;
-
-  Movimento.findByPk(id)
-    .then((movimento) => {
-      if (movimento) {
-        movimento
-          .update(req.body, {
-            where: { id },
-          })
-          .then(() => {
-            res.status(status.OK).send();
-          })
-          .catch((error) => next(error));
-      } else {
-        res.status(status.NOT_FOUND).send();
-      }
-    })
-    .catch((error) => next(error));
-};
-
-exports.Delete = (req, res, next) => {
+exports.Delete = (req, res) => {
   const { id } = req.params;
   Movimento.findByPk(id)
     .then((movimento) => {
@@ -77,10 +56,10 @@ exports.Delete = (req, res, next) => {
           .then(() => {
             res.status(status.OK).send();
           })
-          .catch((error) => next(error));
+          .catch((error) => defaultErrorHandler(res, error));
       } else {
         res.status(status.NOT_FOUND).send();
       }
     })
-    .catch((error) => next(error));
+    .catch((error) => defaultErrorHandler(res, error));
 };
