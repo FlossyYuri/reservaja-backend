@@ -1,6 +1,7 @@
 const Empresa = require("../models/empresa");
 const status = require("http-status");
 const { sanitizeEmpresa, getPagination, getPaginatedData } = require("../utils");
+const { Op } = require("sequelize");
 
 exports.Insert = (req, res, next) => {
   const data = req.body;
@@ -19,9 +20,27 @@ exports.Insert = (req, res, next) => {
 };
 
 exports.SearchAll = (req, res, next) => {
-  const { page = 0, size = 20 } = req.query;
+  const { page = 0, size = 20, nome, tipo, pacote, ativo } = req.query;
   const { limit, offset } = getPagination(page, size);
-  Empresa.findAndCountAll({ limit, offset })
+  const where = {}
+  if (req.user.funcao === 'vendedor') {
+    where.usuarioId = req.user.id
+  }
+  if (nome) {
+    where.nome = {
+      [Op.substring]: nome
+    }
+  }
+  if (ativo) {
+    where.ativo = !!ativo
+  }
+  if (tipo) {
+    where.tipo = tipo
+  }
+  if (pacote) {
+    where.pacote = pacote
+  }
+  Empresa.findAndCountAll({ limit, offset, where })
     .then((data) => {
       if (data) {
         data.rows = data.rows.map((item) => sanitizeEmpresa(item))

@@ -1,3 +1,4 @@
+const status = require("http-status");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const Usuario = require("./models/usuario");
@@ -76,7 +77,56 @@ exports.getPaginatedData = (data, page, limit) => {
   const { count: totalItems, rows: items } = data;
   const currentPage = page ? +page : 0;
   const totalPages = Math.ceil(totalItems / limit);
-
   return { totalItems, items, totalPages, currentPage };
 };
 
+exports.fetchPaginatedData = (req, res, Model, where = {}, sanitizer) => {
+  const { page = 0, size = 20 } = req.query;
+  const { limit, offset } = this.getPagination(page, size);
+  Model.findAndCountAll({ limit, offset, where })
+    .then((data) => {
+      if (data) {
+        if (sanitizer)
+          data.rows = data.rows.map((item) => sanitizer(item))
+        res.status(status.OK).send(this.getPaginatedData(data, page, limit));
+      }
+    })
+    .catch((error) => {
+      console.log(error)
+      res.status(status.INTERNAL_SERVER_ERROR).send()
+    });
+}
+
+exports.updateRow = (req, res, Model, body, incomeId) => new Promise((resolve, reject) => {
+  const id = incomeId || req.params.id
+  Model.findByPk(id)
+    .then((data) => {
+      if (data) {
+        data
+          .update(body, {
+            where: { id },
+          })
+          .then(() => {
+            resolve(data)
+          })
+          .catch((error) => reject(error));
+      } else {
+        resolve('empty')
+      }
+    })
+    .catch((error) => reject(error));
+})
+
+exports.getRow = (req, res, Model, incomeId) => new Promise((resolve, reject) => {
+  {
+    const id = incomeId || req.params.id
+    Model.findByPk(id)
+      .then((data) => {
+        resolve(data)
+      })
+      .catch((error) => reject(error));
+  }
+})
+
+exports.cloneObject = (data = {}) => JSON.parse(JSON.stringify(data))
+exports.addDays = (date, days) => date.setDate(date.getDate() + days)
