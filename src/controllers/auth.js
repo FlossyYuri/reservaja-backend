@@ -16,7 +16,7 @@ exports.Login = (req, res, next) => {
             const token = generateToken(usuario.id);
             res.status(status.OK).send({ token });
           } else {
-            res.status(status.UNAUTHORIZED).send("Senha incorreta!");
+            res.status(status.UNAUTHORIZED).send("Usuário desativado, contacte o administrador!");
           }
         } else {
           res.status(status.UNAUTHORIZED).send("Senha incorreta!");
