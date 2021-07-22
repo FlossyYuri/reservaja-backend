@@ -2,6 +2,7 @@ const http = require("http");
 const cors = require("cors");
 const express = require("express");
 const dotenv = require("dotenv");
+dotenv.config();
 const status = require("http-status");
 const sequelize = require("./src/database/database");
 const Empresa = require("./src/models/empresa");
@@ -20,7 +21,6 @@ Usuario.hasMany(Movimento, {
 Movimento.belongsTo(Usuario)
 Empresa.hasMany(Movimento);
 Movimento.belongsTo(Empresa)
-dotenv.config();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
