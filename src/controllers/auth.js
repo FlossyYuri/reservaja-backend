@@ -22,7 +22,7 @@ exports.Login = (req, res, next) => {
           res.status(status.UNAUTHORIZED).send("Senha incorreta!");
         }
       } else {
-        res.status(status.NOT_FOUND).send("Nenhum usuário com esse email.");
+        res.status(status.NOT_FOUND).send("Nenhum usuário com esse email!");
       }
     })
     .catch((error) => next(error));
