@@ -11,10 +11,15 @@ exports.Login = (req, res, next) => {
       if (usuario) {
         const validPassword = await compareHash(senha, usuario.senha);
         if (validPassword) {
-          const token = generateToken(usuario.id);
-          res.status(status.OK).send({ token });
+          if (usuario.ativo) {
+
+            const token = generateToken(usuario.id);
+            res.status(status.OK).send({ token });
+          } else {
+            res.status(status.UNAUTHORIZED).send("Senha incorreta!");
+          }
         } else {
-          res.status(status.NOT_FOUND).send("Senha incorreta!");
+          res.status(status.UNAUTHORIZED).send("Senha incorreta!");
         }
       } else {
         res.status(status.NOT_FOUND).send("Nenhum usuário com esse email.");
