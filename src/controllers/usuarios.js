@@ -1,12 +1,11 @@
 const Usuario = require("../models/usuario");
 const status = require("http-status");
-const { generateHash, fetchPaginatedData, defaultErrorHandler } = require("../utils");
+const { fetchPaginatedData, defaultErrorHandler, cloneObject } = require("../utils");
 const { Op } = require("sequelize");
 
 exports.Insert = (req, res) => {
   const usuario = req.body;
   usuario.ativo = 1;
-  usuario.senha = generateHash(usuario.senha);
   Usuario.create(usuario)
     .then((usuario) => {
       if (usuario) {
@@ -19,7 +18,7 @@ exports.Insert = (req, res) => {
 };
 
 exports.SearchAll = (req, res) => {
-  const { nome, funcao, ativo } = req.query;
+  const { nome, funcao, ativo, startDate, endDate } = req.query;
 
   const where = {}
   if (nome) {
@@ -32,6 +31,12 @@ exports.SearchAll = (req, res) => {
   }
   if (funcao) {
     where.funcao = funcao
+  }
+  if (startDate) {
+    where.createdAt = { [Op.gt]: new Date(startDate) }
+  }
+  if (endDate) {
+    where.createdAt = { [Op.lt]: new Date(endDate) }
   }
   fetchPaginatedData(req, res, Usuario, where)
 };
@@ -51,12 +56,13 @@ exports.SearchOne = (req, res) => {
 
 exports.Update = (req, res) => {
   const id = req.params.id;
+  const { ativo, contacto } = req.body
 
   Usuario.findByPk(id)
     .then((usuario) => {
       if (usuario) {
         usuario
-          .update(req.body, {
+          .update(cloneObject({ ativo, contacto }), {
             where: { id },
           })
           .then(() => {

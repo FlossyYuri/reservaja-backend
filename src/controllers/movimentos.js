@@ -1,6 +1,9 @@
 const Movimento = require("../models/movimento");
 const status = require("http-status");
-const { fetchPaginatedData, defaultErrorHandler } = require("../utils");
+const { fetchPaginatedData, defaultErrorHandler, updateRow } = require("../utils");
+const Empresa = require("../models/empresa");
+const Usuario = require("../models/usuario");
+const { Op } = require("sequelize");
 
 exports.Insert = (tipo, descricao, usuarioId, empresaId) => new Promise((resolve, reject) => {
   const movimento = { tipo, descricao, usuarioId, respondida: false }
@@ -18,17 +21,54 @@ exports.Insert = (tipo, descricao, usuarioId, empresaId) => new Promise((resolve
 });
 
 exports.SearchAll = (req, res) => {
-  fetchPaginatedData(req, res, Movimento)
+  const { startDate, endDate } = req.query;
+  if (startDate) {
+    where.createdAt = { [Op.gt]: new Date(startDate) }
+  }
+  if (endDate) {
+    where.createdAt = { [Op.lt]: new Date(endDate) }
+  }
+  fetchPaginatedData(req, res, Movimento, where)
 };
 
 exports.SearchTransactions = (req, res) => {
+  const { startDate, endDate } = req.query;
   const where = {}
-  where[Op.or] = [{ tipo: "pagamento" }, { tipo: "oferta" }, { tipo: "teste" }]
+  where = {
+    tipo: {
+      [Op.ne]: "cadastrar-empresa",
+    }
+  }
+  if (startDate) {
+    where.createdAt = { [Op.gt]: new Date(startDate) }
+  }
+  if (endDate) {
+    where.createdAt = { [Op.lt]: new Date(endDate) }
+  }
   fetchPaginatedData(req, res, Movimento, where)
 };
 exports.SearchNotifications = (req, res) => {
-  const where = { tipo: "cadastrar-empresa" }
-  fetchPaginatedData(req, res, Movimento, where)
+  const { startDate, endDate, tipo, pacote } = req.query;
+  const where = { tipo: "cadastrar-empresa", respondida: 0 }
+  if (startDate) {
+    where.createdAt = { [Op.gt]: new Date(startDate) }
+  }
+  if (endDate) {
+    where.createdAt = { [Op.lt]: new Date(endDate) }
+  }
+  const empresaWhere = {}
+  if (tipo) {
+    empresaWhere.tipo = tipo
+  }
+  if (pacote) {
+    empresaWhere.pacote = pacote
+  }
+  include = [{ model: Empresa, where: empresaWhere }, {
+    model: Usuario, attributes: {
+      exclude: ['senha']
+    }
+  }]
+  fetchPaginatedData(req, res, Movimento, where, undefined, include)
 };
 exports.SearchOne = (req, res) => {
   const { id } = req.params;
@@ -43,6 +83,18 @@ exports.SearchOne = (req, res) => {
     })
     .catch((error) => defaultErrorHandler(res, error));
 };
+
+exports.Responder = (id) => new Promise((resolve, reject) => {
+  console.log("ID to respond ===>", id)
+  updateRow(undefined, undefined, Movimento, { respondida: 1 }, id)
+    .then((movimento) => {
+      console.log(movimento)
+      if (typeof movimento === 'string') resolve(false)
+      else {
+        resolve(true)
+      }
+    }).catch((err => reject(err)))
+});
 
 exports.Delete = (req, res) => {
   const { id } = req.params;

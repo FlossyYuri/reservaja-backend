@@ -1,5 +1,6 @@
 const Sequelize = require("sequelize");
 const sequelize = require("../database/database");
+const { generateHash } = require("../utils");
 
 const Usuario = sequelize.define("usuario", {
   id: {
@@ -26,6 +27,9 @@ const Usuario = sequelize.define("usuario", {
   senha: {
     allowNull: false,
     type: Sequelize.STRING,
+    set(value) {
+      this.setDataValue('senha', generateHash(value));
+    },
   },
   funcao: {
     allowNull: false,

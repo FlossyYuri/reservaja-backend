@@ -1,7 +1,7 @@
 const express = require("express");
+const { authenticateToken, isAdmin } = require("../config/authValidation");
 const router = express.Router();
 const UsuarioController = require("../controllers/usuarios");
-const { authenticateToken, isAdmin } = require("../utils");
 
 router.post("/", UsuarioController.Insert);
 router.get("/", authenticateToken, isAdmin, UsuarioController.SearchAll);

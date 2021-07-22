@@ -60,6 +60,12 @@ const Empresa = sequelize.define("empresa", {
   horario_comercial: {
     allowNull: false,
     type: Sequelize.TEXT,
+    get() {
+      return JSON.parse(this.getDataValue('horario_comercial'))
+    },
+    set(value) {
+      this.setDataValue('horario_comercial', JSON.stringify(value));
+    }
   },
   documentoId: {
     allowNull: false,

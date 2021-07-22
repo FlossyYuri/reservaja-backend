@@ -11,16 +11,15 @@ const app = express();
 const routes = require("./src/routes");
 
 Usuario.hasMany(Empresa);
+Empresa.belongsTo(Usuario)
 Usuario.hasMany(Movimento, {
   foreignKey: {
     allowNull: true
   }
 });
-Empresa.hasMany(Movimento, {
-  foreignKey: {
-    allowNull: true
-  }
-});
+Movimento.belongsTo(Usuario)
+Empresa.hasMany(Movimento);
+Movimento.belongsTo(Empresa)
 dotenv.config();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

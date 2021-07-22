@@ -27,7 +27,7 @@ exports.Insert = (req, res) => {
     .catch((error) => next(error));
 };
 exports.SearchAll = (req, res) => {
-  const { nome, tipo, pacote, aprovado } = req.query;
+  const { nome, tipo, pacote, aprovado, startDate, endDate } = req.query;
 
   const where = {}
   if (req.user.funcao === 'vendedor') {
@@ -47,7 +47,13 @@ exports.SearchAll = (req, res) => {
   if (pacote) {
     where.pacote = pacote
   }
-  fetchPaginatedData(req, res, Empresa, where, sanitizeEmpresa)
+  if (startDate) {
+    where.createdAt = { [Op.gt]: new Date(startDate) }
+  }
+  if (endDate) {
+    where.createdAt = { [Op.lt]: new Date(endDate) }
+  }
+  fetchPaginatedData(req, res, Empresa, where)
 };
 exports.SearchOne = (req, res) => {
   const id = req.params.id;
@@ -64,9 +70,9 @@ exports.SearchOne = (req, res) => {
 };
 
 exports.Update = (req, res) => {
-  const { descricao, contacto, website, tempo_minimo, logotipoId } = req.body
+  const { descricao, contacto, website, tempo_minimo, logotipoId, horario_comercial } = req.body
   updateRow(req, res, Empresa, cloneObject(
-    { descricao, contacto, website, tempo_minimo, logotipoId, pacote })
+    { descricao, contacto, website, tempo_minimo, logotipoId, pacote, horario_comercial })
   ).then((data) => {
     if (typeof data === 'string') res.status(status.NOT_FOUND).send();
     else res.status(status.OK).send(data);
@@ -74,19 +80,40 @@ exports.Update = (req, res) => {
 };
 
 exports.Aprovar = (req, res) => {
-  updateRow(req, res, Empresa, cloneObject(
-    { aprovado: 1 })
-  ).then((empresa) => {
-    if (typeof empresa === 'string') res.status(status.NOT_FOUND).send();
-    else {
-      res.status(status.NO_CONTENT).send();
-      Movimentos.Insert(
-        'aprovar-empresa',
-        `${req.user.nome} aprovou o contrato com a ${empresa.nome}`,
-        req.user.id, empresa.id
-      )
-    }
-  }).catch((err => defaultErrorHandler(res, err)))
+  const { movimentoId } = req.body
+  updateRow(req, res, Empresa, { aprovado: 1 })
+    .then((empresa) => {
+      if (typeof empresa === 'string') res.status(status.NOT_FOUND).send();
+      else {
+        res.status(status.NO_CONTENT).send();
+        Movimentos.Insert(
+          'aprovar-empresa',
+          `${req.user.nome} aprovou o contrato com a ${empresa.nome}`,
+          req.user.id, empresa.id
+        )
+        console.log("About to go", movimentoId)
+        if (movimentoId !== null)
+          Movimentos.Responder(movimentoId)
+      }
+    }).catch((err => defaultErrorHandler(res, err)))
+};
+
+exports.Reprovar = (req, res) => {
+  const { movimentoId } = req.body
+  updateRow(req, res, Empresa, { aprovado: 0 })
+    .then((empresa) => {
+      if (typeof empresa === 'string') res.status(status.NOT_FOUND).send();
+      else {
+        res.status(status.NO_CONTENT).send();
+        Movimentos.Insert(
+          'reprovar-empresa',
+          `${req.user.nome} reprovou o contrato com a ${empresa.nome}`,
+          req.user.id, empresa.id
+        )
+        if (movimentoId)
+          Movimentos.Responder(movimentoId)
+      }
+    }).catch((err => defaultErrorHandler(res, err)))
 };
 
 exports.Add1MonthTrial = (req, res) => {

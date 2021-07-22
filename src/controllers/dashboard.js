@@ -4,7 +4,7 @@ const { defaultErrorHandler } = require("../utils");
 const { Op } = require("sequelize");
 
 exports.SearchAll = async (req, res) => {
-  const { tipo, pacote, aprovado } = req.query;
+  const { tipo, pacote, aprovado, startDate, endDate } = req.query;
 
   const where = {}
   if (req.user.funcao === 'vendedor') {
@@ -21,6 +21,12 @@ exports.SearchAll = async (req, res) => {
   }
   if (pacote) {
     where.pacote = pacote
+  }
+  if (startDate) {
+    where.createdAt = { [Op.gt]: new Date(startDate) }
+  }
+  if (endDate) {
+    where.createdAt = { [Op.lt]: new Date(endDate) }
   }
   try {
     const todasEmpresas = await Empresa.count({
