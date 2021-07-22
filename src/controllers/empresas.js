@@ -8,9 +8,6 @@ exports.Insert = (req, res) => {
   const data = req.body;
   data.aprovado = false;
   data.usuarioId = req.user.id;
-  data.horario_comercial = JSON.stringify(data.horario_comercial)
-  data.expiracaoTrial = null
-  data.expiracaoPagamento = null
   Empresa.create(req.body)
     .then((empresa) => {
       if (empresa) {
@@ -24,7 +21,7 @@ exports.Insert = (req, res) => {
         res.status(status.NOT_FOUND).send();
       }
     })
-    .catch((error) => next(error));
+    .catch((error) => defaultErrorHandler(res, error));
 };
 exports.SearchAll = (req, res) => {
   const { nome, tipo, pacote, aprovado, startDate, endDate } = req.query;
@@ -47,11 +44,12 @@ exports.SearchAll = (req, res) => {
   if (pacote) {
     where.pacote = pacote
   }
-  if (startDate) {
-    where.createdAt = { [Op.gt]: new Date(startDate) }
-  }
-  if (endDate) {
-    where.createdAt = { [Op.lt]: new Date(endDate) }
+  if (startDate && endDate) {
+    where.createdAt = { [Op.between]: [new Date(startDate), new Date(endDate)] }
+  } else if (startDate) {
+    where.createdAt = { [Op.gte]: new Date(startDate) }
+  } else if (endDate) {
+    where.createdAt = { [Op.lte]: new Date(endDate) }
   }
   fetchPaginatedData(req, res, Empresa, where)
 };

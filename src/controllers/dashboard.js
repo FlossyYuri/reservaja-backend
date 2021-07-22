@@ -11,10 +11,7 @@ exports.SearchAll = async (req, res) => {
     where.usuarioId = req.user.id
   }
   if (aprovado) {
-    if (aprovado === 'true')
-      where.aprovado = 1
-    if (aprovado === 'false')
-      where.aprovado = 0
+    where.aprovado = aprovado
   }
   if (tipo) {
     where.tipo = tipo
@@ -22,11 +19,12 @@ exports.SearchAll = async (req, res) => {
   if (pacote) {
     where.pacote = pacote
   }
-  if (startDate) {
-    where.createdAt = { [Op.gt]: new Date(startDate) }
-  }
-  if (endDate) {
-    where.createdAt = { [Op.lt]: new Date(endDate) }
+  if (startDate && endDate) {
+    where.createdAt = { [Op.between]: [new Date(startDate), new Date(endDate)] }
+  } else if (startDate) {
+    where.createdAt = { [Op.gte]: new Date(startDate) }
+  } else if (endDate) {
+    where.createdAt = { [Op.lte]: new Date(endDate) }
   }
   try {
     const todasEmpresas = await Empresa.count({

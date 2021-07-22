@@ -32,11 +32,12 @@ exports.SearchAll = (req, res) => {
   if (funcao) {
     where.funcao = funcao
   }
-  if (startDate) {
-    where.createdAt = { [Op.gt]: new Date(startDate) }
-  }
-  if (endDate) {
-    where.createdAt = { [Op.lt]: new Date(endDate) }
+  if (startDate && endDate) {
+    where.createdAt = { [Op.between]: [new Date(startDate), new Date(endDate)] }
+  } else if (startDate) {
+    where.createdAt = { [Op.gte]: new Date(startDate) }
+  } else if (endDate) {
+    where.createdAt = { [Op.lte]: new Date(endDate) }
   }
   fetchPaginatedData(req, res, Usuario, where)
 };

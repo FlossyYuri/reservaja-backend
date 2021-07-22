@@ -22,11 +22,12 @@ exports.Insert = (tipo, descricao, usuarioId, empresaId) => new Promise((resolve
 
 exports.SearchAll = (req, res) => {
   const { startDate, endDate } = req.query;
-  if (startDate) {
-    where.createdAt = { [Op.gt]: new Date(startDate) }
-  }
-  if (endDate) {
-    where.createdAt = { [Op.lt]: new Date(endDate) }
+  if (startDate && endDate) {
+    where.createdAt = { [Op.between]: [new Date(startDate), new Date(endDate)] }
+  } else if (startDate) {
+    where.createdAt = { [Op.gte]: new Date(startDate) }
+  } else if (endDate) {
+    where.createdAt = { [Op.lte]: new Date(endDate) }
   }
   fetchPaginatedData(req, res, Movimento, where)
 };
@@ -39,22 +40,24 @@ exports.SearchTransactions = (req, res) => {
       [Op.ne]: "cadastrar-empresa",
     }
   }
-  if (startDate) {
-    where.createdAt = { [Op.gt]: new Date(startDate) }
-  }
-  if (endDate) {
-    where.createdAt = { [Op.lt]: new Date(endDate) }
+  if (startDate && endDate) {
+    where.createdAt = { [Op.between]: [new Date(startDate), new Date(endDate)] }
+  } else if (startDate) {
+    where.createdAt = { [Op.gte]: new Date(startDate) }
+  } else if (endDate) {
+    where.createdAt = { [Op.lte]: new Date(endDate) }
   }
   fetchPaginatedData(req, res, Movimento, where)
 };
 exports.SearchNotifications = (req, res) => {
   const { startDate, endDate, tipo, pacote } = req.query;
   const where = { tipo: "cadastrar-empresa", respondida: 0 }
-  if (startDate) {
-    where.createdAt = { [Op.gt]: new Date(startDate) }
-  }
-  if (endDate) {
-    where.createdAt = { [Op.lt]: new Date(endDate) }
+  if (startDate && endDate) {
+    where.createdAt = { [Op.between]: [new Date(startDate), new Date(endDate)] }
+  } else if (startDate) {
+    where.createdAt = { [Op.gte]: new Date(startDate) }
+  } else if (endDate) {
+    where.createdAt = { [Op.lte]: new Date(endDate) }
   }
   const empresaWhere = {}
   if (tipo) {
