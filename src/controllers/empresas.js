@@ -1,6 +1,6 @@
 const Empresa = require("../models/empresa");
 const status = require("http-status");
-const { sanitizeEmpresa, fetchPaginatedData, updateRow, cloneObject, getRow, defaultErrorHandler } = require("../utils");
+const { fetchPaginatedData, updateRow, cloneObject, getRow, defaultErrorHandler } = require("../utils");
 const { Op } = require("sequelize");
 const Movimentos = require("../controllers/movimentos");
 
@@ -55,11 +55,10 @@ exports.SearchAll = (req, res) => {
 };
 exports.SearchOne = (req, res) => {
   const id = req.params.id;
-
   Empresa.findByPk(id)
     .then((empresa) => {
       if (empresa) {
-        res.status(status.OK).send(sanitizeEmpresa(empresa));
+        res.status(status.OK).send(empresa);
       } else {
         res.status(status.NOT_FOUND).send();
       }
@@ -117,6 +116,7 @@ exports.Reprovar = (req, res) => {
 exports.Add1MonthTrial = (req, res) => {
   getRow(req, res, Empresa).then((data) => {
     const now = new Date()
+    if (!(data.expiracaoTrial instanceof Date && !isNaN(data.expiracaoTrial))) data.expiracaoTrial = new Date()
     const expiracaoTrial = new Date(data.expiracaoTrial || '')
     if (expiracaoTrial < now) {
       expiracaoTrial.setDate(now.getDate() + 30)
@@ -142,6 +142,7 @@ exports.Add1MonthTrial = (req, res) => {
 exports.Add1MonthPayment = (req, res) => {
   getRow(req, res, Empresa).then((data) => {
     const now = new Date()
+    if (!(data.expiracaoPagamento instanceof Date && !isNaN(data.expiracaoPagamento))) data.expiracaoPagamento = new Date()
     const expiracaoPagamento = new Date(data.expiracaoPagamento || '')
     if (expiracaoPagamento < now) {
       expiracaoPagamento.setDate(now.getDate() + 30)
