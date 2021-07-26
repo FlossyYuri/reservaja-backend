@@ -12,7 +12,7 @@ exports.generateToken = (id) => {
     }
   );
   return jwt.sign({ id, refreshToken }, process.env.TOKEN_SECRET, {
-    expiresIn: 15 * 60,
+    expiresIn: '1h',
   });
 };
 exports.decodeToken = (token) => jwt.decode(token);

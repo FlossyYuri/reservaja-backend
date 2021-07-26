@@ -33,12 +33,12 @@ exports.SearchAll = (req, res) => {
 };
 
 exports.SearchTransactions = (req, res) => {
-  const { startDate, endDate } = req.query;
-  const where = {}
-  where = {
-    tipo: {
-      [Op.ne]: "cadastrar-empresa",
-    }
+  const { startDate, endDate, tipo } = req.query;
+  const where = {
+
+  }
+  if (tipo) {
+    where.tipo = tipo
   }
   if (startDate && endDate) {
     where.createdAt = { [Op.between]: [new Date(startDate), new Date(endDate)] }
@@ -47,7 +47,12 @@ exports.SearchTransactions = (req, res) => {
   } else if (endDate) {
     where.createdAt = { [Op.lte]: new Date(endDate) }
   }
-  fetchPaginatedData(req, res, Movimento, where)
+  include = [{ model: Empresa }, {
+    model: Usuario, attributes: {
+      exclude: ['senha']
+    }
+  }]
+  fetchPaginatedData(req, res, Movimento, where, undefined, include)
 };
 exports.SearchNotifications = (req, res) => {
   const { startDate, endDate, tipo, pacote } = req.query;
