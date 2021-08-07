@@ -3,19 +3,23 @@ const status = require("http-status");
 const { fetchPaginatedData, updateRow, cloneObject, getRow, defaultErrorHandler } = require("../utils");
 const { Op } = require("sequelize");
 const Movimentos = require("../controllers/movimentos");
+const { pacotesObject } = require("../../data/constants");
 
 exports.Insert = (req, res) => {
+  console.log('===========> ', req.body)
   const data = req.body;
   data.aprovado = false;
   data.usuarioId = req.user.id;
-  Empresa.create(req.body)
+  console.log('===========> ', data)
+  Empresa.create(data)
     .then((empresa) => {
       if (empresa) {
         res.status(status.OK).send(empresa);
         Movimentos.Insert(
           'cadastrar-empresa',
-          `O ${req.user.nome} cadastrou a empresa ${empresa.nome}`,
-          req.user.id, empresa.id
+          `O ${req.user.nome} cadastrou a empresa ${empresa.nome} com o pacote ${pacotesObject[empresa.pacote].label}`,
+          req.user.id, empresa.id,
+          pacotesObject[empresa.pacote].contrato
         )
       } else {
         res.status(status.NOT_FOUND).send();
@@ -156,8 +160,8 @@ exports.Add1MonthPayment = (req, res) => {
           res.status(status.NO_CONTENT).send();
           Movimentos.Insert(
             'pagamento',
-            `A ${empresa.nome} pagou +1 mês do pacote ${empresa.pacote}`,
-            req.user.id, empresa.id
+            `A ${empresa.nome} pagou +1 mês do pacote ${pacotesObject[empresa.pacote].label}.`,
+            req.user.id, empresa.id, pacotesObject[empresa.pacote].mensalidade
           )
         }
 

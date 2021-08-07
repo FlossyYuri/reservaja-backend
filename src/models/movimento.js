@@ -16,6 +16,11 @@ const Movimento = sequelize.define("movimento", {
     allowNull: false,
     type: Sequelize.STRING,
   },
+  valor: {
+    allowNull: true,
+    type: Sequelize.FLOAT,
+    default: 0
+  },
   respondida: {
     allowNull: false,
     type: Sequelize.BOOLEAN,

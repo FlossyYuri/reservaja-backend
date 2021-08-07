@@ -8,11 +8,11 @@ exports.generateToken = (id) => {
     { random: Math.random() * 1000000 },
     process.env.TOKEN_SECRET,
     {
-      expiresIn: "2 days",
+      expiresIn: "30 days",
     }
   );
   return jwt.sign({ id, refreshToken }, process.env.TOKEN_SECRET, {
-    expiresIn: '1h',
+    expiresIn: '7 days',
   });
 };
 exports.decodeToken = (token) => jwt.decode(token);

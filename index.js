@@ -25,7 +25,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 global.__basedir = __dirname;
-app.use(express.static("/uploads/files"));
 app.use(cors());
 
 app.use(routes);

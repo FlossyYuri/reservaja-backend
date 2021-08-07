@@ -67,13 +67,13 @@ const Empresa = sequelize.define("empresa", {
       this.setDataValue('horario_comercial', JSON.stringify(value));
     }
   },
-  documentoId: {
+  documento: {
     allowNull: false,
-    type: Sequelize.INTEGER,
+    type: Sequelize.STRING,
   },
-  logotipoId: {
+  logotipo: {
     allowNull: false,
-    type: Sequelize.INTEGER,
+    type: Sequelize.STRING,
   },
 });
 

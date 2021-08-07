@@ -10,9 +10,6 @@ exports.SearchAll = async (req, res) => {
   if (req.user.funcao === 'vendedor') {
     where.usuarioId = req.user.id
   }
-  if (aprovado) {
-    where.aprovado = aprovado
-  }
   if (tipo) {
     where.tipo = tipo
   }
@@ -27,16 +24,16 @@ exports.SearchAll = async (req, res) => {
     where.createdAt = { [Op.lte]: new Date(endDate) }
   }
   try {
-    const todasEmpresas = await Empresa.count({
+    const todas = await Empresa.count({
       where,
     })
-    const empresasTrial = await Empresa.count({
+    const trial = await Empresa.count({
       where: { ...where, expiracaoTrial: { [Op.gt]: new Date() } },
     })
-    const empresasContrato = await Empresa.count({
-      where: { ...where, expiracaoPagamento: { [Op.gt]: new Date() } },
+    const contratos = await Empresa.count({
+      where: { ...where, aprovado: true },
     })
-    res.status(status.OK).send({ todasEmpresas, empresasTrial, empresasContrato })
+    res.status(status.OK).send({ todas, trial, contratos, naoAprovado: todas - contratos })
   } catch (error) {
     defaultErrorHandler(res, error)
   }

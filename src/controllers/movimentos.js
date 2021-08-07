@@ -5,8 +5,8 @@ const Empresa = require("../models/empresa");
 const Usuario = require("../models/usuario");
 const { Op } = require("sequelize");
 
-exports.Insert = (tipo, descricao, usuarioId, empresaId) => new Promise((resolve, reject) => {
-  const movimento = { tipo, descricao, usuarioId, respondida: false }
+exports.Insert = (tipo, descricao, usuarioId, empresaId, valor) => new Promise((resolve, reject) => {
+  const movimento = { tipo, descricao, usuarioId, respondida: false, valor }
   if (empresaId)
     movimento.empresaId = empresaId
   Movimento.create(movimento)
