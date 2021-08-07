@@ -9,7 +9,7 @@ exports.authenticateToken = (req, res, next) => {
   jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
     if (err)
       console.log(err);
-    if (err) return res.status(403).sendStatus(403);
+    if (err) return res.status(status.UNAUTHORIZED).send({ inspiredToken: true })
     else {
       Usuario.findByPk(user.id)
         .then((usuario) => {
@@ -17,7 +17,7 @@ exports.authenticateToken = (req, res, next) => {
             req.user = usuario;
             next();
           } else {
-            res.status(status.NOT_FOUND).send();
+            res.status(status.FORBIDDEN).send();
           }
         })
         .catch((error) => next(error));
