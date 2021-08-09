@@ -22,6 +22,7 @@ exports.Insert = (tipo, descricao, usuarioId, empresaId, valor) => new Promise((
 
 exports.SearchAll = (req, res) => {
   const { startDate, endDate } = req.query;
+  const where = {}
   if (startDate && endDate) {
     where.createdAt = { [Op.between]: [new Date(startDate), new Date(endDate)] }
   } else if (startDate) {
@@ -32,13 +33,40 @@ exports.SearchAll = (req, res) => {
   fetchPaginatedData(req, res, Movimento, where)
 };
 
-exports.SearchTransactions = (req, res) => {
-  const { startDate, endDate, tipo } = req.query;
-  const where = {
-
+exports.SearchPerMonth = (where = {}, month) => new Promise((resolve, reject) => {
+  {
+    let today = new Date(new Date().setHours(0, 0, 0));
+    const withMonth = new Date(month ? today.setMonth(month) : new Date().setHours(0, 0, 0))
+    const firstDay = new Date(withMonth.setDate(1))
+    const lastDay = new Date(new Date(withMonth.getFullYear(), today.getMonth() + 1, 0).setHours(23, 59));
+    where.createdAt = { [Op.between]: [firstDay, lastDay] }
+    Movimento.findAll({
+      where
+    })
+      .then((data) => {
+        if (data) {
+          resolve(data)
+        }
+      })
+      .catch((error) => reject(error));
   }
+});
+
+exports.SearchTransactions = (req, res) => {
+  const { startDate, endDate, tipo, empresaId } = req.query;
+
+  const where = {}
   if (tipo) {
-    where.tipo = tipo
+    console.log(tipo)
+    if (typeof tipo === 'string')
+      where.tipo = tipo
+    else
+      where.tipo = {
+        [Op.or]: tipo
+      }
+  }
+  if (empresaId) {
+    where.empresaId = empresaId
   }
   if (startDate && endDate) {
     where.createdAt = { [Op.between]: [new Date(startDate), new Date(endDate)] }

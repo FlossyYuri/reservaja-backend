@@ -1,9 +1,9 @@
 const Empresa = require("../models/empresa");
 const status = require("http-status");
 const { fetchPaginatedData, updateRow, cloneObject, getRow, defaultErrorHandler } = require("../utils");
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const Movimentos = require("../controllers/movimentos");
-const { pacotesObject } = require("../../data/constants");
+const { pacotesObject, months } = require("../../data/constants");
 
 exports.Insert = (req, res) => {
   console.log('===========> ', req.body)
@@ -82,21 +82,35 @@ exports.Update = (req, res) => {
 
 exports.Aprovar = (req, res) => {
   const { movimentoId } = req.body
-  updateRow(req, res, Empresa, { aprovado: 1 })
-    .then((empresa) => {
-      if (typeof empresa === 'string') res.status(status.NOT_FOUND).send();
-      else {
-        res.status(status.NO_CONTENT).send();
-        Movimentos.Insert(
-          'aprovar-empresa',
-          `${req.user.nome} aprovou o contrato com a ${empresa.nome}`,
-          req.user.id, empresa.id
-        )
-        console.log("About to go", movimentoId)
-        if (movimentoId !== null)
-          Movimentos.Responder(movimentoId)
-      }
-    }).catch((err => defaultErrorHandler(res, err)))
+  getRow(req, res, Empresa).then((data) => {
+    const now = new Date()
+    if (!(data.expiracaoTrial instanceof Date && !isNaN(data.expiracaoTrial))) data.expiracaoTrial = new Date()
+    const expiracaoTrial = new Date(data.expiracaoTrial || '')
+    if (expiracaoTrial < now) {
+      expiracaoTrial.setDate(now.getDate() + 30)
+    } else {
+      expiracaoTrial.setDate(expiracaoTrial.getDate() + 30)
+    }
+    updateRow(req, res, Empresa, { expiracaoTrial: expiracaoTrial.toJSON(), aprovado: 1 })
+      .then((empresa) => {
+        if (typeof empresa === 'string') res.status(status.NOT_FOUND).send();
+        else {
+          res.status(status.NO_CONTENT).send();
+          Movimentos.Insert(
+            'teste',
+            `${req.user.nome} ofereceu 1 mês de teste à ${empresa.nome}`,
+            req.user.id, empresa.id
+          )
+          Movimentos.Insert(
+            'aprovar-empresa',
+            `${req.user.nome} aprovou o contrato com a ${empresa.nome}`,
+            req.user.id, empresa.id
+          )
+          if (movimentoId !== null)
+            Movimentos.Responder(movimentoId)
+        }
+      }).catch((err => defaultErrorHandler(res, err)))
+  })
 };
 
 exports.Reprovar = (req, res) => {
@@ -117,32 +131,6 @@ exports.Reprovar = (req, res) => {
     }).catch((err => defaultErrorHandler(res, err)))
 };
 
-exports.Add1MonthTrial = (req, res) => {
-  getRow(req, res, Empresa).then((data) => {
-    const now = new Date()
-    if (!(data.expiracaoTrial instanceof Date && !isNaN(data.expiracaoTrial))) data.expiracaoTrial = new Date()
-    const expiracaoTrial = new Date(data.expiracaoTrial || '')
-    if (expiracaoTrial < now) {
-      expiracaoTrial.setDate(now.getDate() + 30)
-    } else {
-      expiracaoTrial.setDate(expiracaoTrial.getDate() + 30)
-    }
-    updateRow(req, res, Empresa, { expiracaoTrial: expiracaoTrial.toJSON() })
-      .then((empresa) => {
-        if (typeof empresa === 'string') res.status(status.NOT_FOUND).send();
-        else {
-          res.status(status.NO_CONTENT).send();
-          Movimentos.Insert(
-            'teste',
-            `${req.user.nome} ofereceu 1 mês de teste à ${empresa.nome}`,
-            req.user.id, empresa.id
-          )
-        }
-
-      }).catch((err => defaultErrorHandler(res, err)))
-  })
-};
-
 exports.Add1MonthPayment = (req, res) => {
   getRow(req, res, Empresa).then((data) => {
     const now = new Date()
@@ -157,12 +145,20 @@ exports.Add1MonthPayment = (req, res) => {
       .then((empresa) => {
         if (typeof empresa === 'string') res.status(status.NOT_FOUND).send();
         else {
-          res.status(status.NO_CONTENT).send();
-          Movimentos.Insert(
-            'pagamento',
-            `A ${empresa.nome} pagou +1 mês do pacote ${pacotesObject[empresa.pacote].label}.`,
-            req.user.id, empresa.id, pacotesObject[empresa.pacote].mensalidade
-          )
+          Movimentos.SearchPerMonth({ tipo: 'pagamento', empresaId: empresa.id }, new Date().getMonth())
+            .then((data) => {
+              if (data.length === 0) {
+                Movimentos.Insert(
+                  'pagamento',
+                  `A ${empresa.nome} pagou o mês de ${months[now.getMonth()]} do pacote ${pacotesObject[empresa.pacote].label}.`,
+                  req.user.id, empresa.id, pacotesObject[empresa.pacote].mensalidade
+                )
+                res.status(status.NO_CONTENT).send();
+              } else {
+                res.status(status.OK).send("Mês já foi pago!");
+              }
+            })
+
         }
 
       }).catch((err => defaultErrorHandler(res, err)))

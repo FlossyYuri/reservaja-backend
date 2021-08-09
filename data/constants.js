@@ -15,3 +15,18 @@ exports.pacotesObject = {
     mensalidade: 7500
   },
 }
+
+exports.months = [
+  'Janeiro',
+  'Fevereiro',
+  'Março',
+  'Abril',
+  'Maio',
+  'Junho',
+  'Julho',
+  'Agosto',
+  'Setembro',
+  'Outubro',
+  'Novembro',
+  'Dezembro'
+]
