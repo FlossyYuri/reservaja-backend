@@ -51,6 +51,21 @@ exports.SearchPerMonth = (where = {}, month) => new Promise((resolve, reject) =>
       .catch((error) => reject(error));
   }
 });
+exports.Faturamento = async (req, res) => {
+  console.log('============>', req.params.empresaId)
+  try {
+    const total = await Movimento.sum('valor',
+      {
+        where: {
+          tipo: { [Op.or]: ['pagamento', 'cadastrar-empresa'] },
+          empresaId: req.params.empresaId
+        }
+      })
+    res.status(status.OK).json({ total })
+  } catch (error) {
+    defaultErrorHandler(res, error)
+  }
+}
 
 exports.SearchTransactions = (req, res) => {
   const { startDate, endDate, tipo, empresaId } = req.query;

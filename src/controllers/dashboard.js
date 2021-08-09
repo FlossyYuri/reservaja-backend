@@ -1,10 +1,11 @@
 const Empresa = require("../models/empresa");
+const Movimento = require("../models/movimento");
 const status = require("http-status");
 const { defaultErrorHandler } = require("../utils");
-const { Op } = require("sequelize");
+const { Op, fn } = require("sequelize");
 
 exports.SearchAll = async (req, res) => {
-  const { tipo, pacote, aprovado, startDate, endDate } = req.query;
+  const { tipo, pacote, startDate, endDate } = req.query;
 
   const where = {}
   if (req.user.funcao === 'vendedor') {
@@ -23,6 +24,7 @@ exports.SearchAll = async (req, res) => {
   } else if (endDate) {
     where.createdAt = { [Op.lte]: new Date(endDate) }
   }
+
   try {
     const todas = await Empresa.count({
       where,
@@ -33,7 +35,14 @@ exports.SearchAll = async (req, res) => {
     const contratos = await Empresa.count({
       where: { ...where, aprovado: true },
     })
-    res.status(status.OK).send({ todas, trial, contratos, naoAprovado: todas - contratos })
+    const receitaContratos = await Movimento.sum('valor', {
+      where: { tipo: 'cadastrar-empresa' }, include: { model: Empresa, where }
+    })
+    const receitaMensalidades = await Movimento.sum('valor',
+      {
+        where: { tipo: 'pagamento' }, include: { model: Empresa, where }
+      })
+    res.status(status.OK).send({ todas, trial, receitaContratos, receitaMensalidades, naoAprovado: todas - contratos })
   } catch (error) {
     defaultErrorHandler(res, error)
   }
