@@ -2,6 +2,8 @@ const Usuario = require("../models/usuario");
 const status = require("http-status");
 const { fetchPaginatedData, defaultErrorHandler, cloneObject } = require("../utils");
 const { Op } = require("sequelize");
+const Empresa = require("../models/empresa");
+const Movimento = require("../models/movimento");
 
 exports.Insert = (req, res) => {
   const usuario = req.body;
@@ -45,9 +47,18 @@ exports.SearchOne = (req, res) => {
   const id = req.params.id;
 
   Usuario.findByPk(id)
-    .then((usuario) => {
+    .then(async (usuario) => {
       if (usuario) {
-        res.status(status.OK).send(usuario);
+        const empresas = await Empresa.count({
+          where: { usuarioId: usuario.id },
+        })
+        const receita = await Movimento.sum('valor', {
+          where: {
+            tipo: { [Op.or]: ['pagamento', 'cadastrar-empresa'] },
+            usuarioId: usuario.id
+          },
+        })
+        res.status(status.OK).send({ ...usuario.dataValues, empresas, receita });
       } else {
         res.status(status.NOT_FOUND).send();
       }
