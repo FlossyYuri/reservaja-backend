@@ -3,6 +3,12 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const saltRounds = 12;
 
+exports.genToken = (data, time) => {
+  return jwt.sign(data, process.env.TOKEN_SECRET, {
+    expiresIn: time || 2 * 60 * 60,
+  });
+};
+
 exports.generateToken = (id) => {
   const refreshToken = jwt.sign(
     { random: Math.random() * 1000000 },

@@ -1,0 +1,8 @@
+{
+  "host": "mocha3024.mochahost.com",
+  "port": 465,
+  "auth": {
+    "user": "reservaja-suporte@ejitech.co.mz",
+    "pass": "SAyGW.iB7Dfh"
+  }
+}
