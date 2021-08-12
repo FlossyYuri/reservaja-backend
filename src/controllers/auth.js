@@ -55,7 +55,7 @@ exports.Email = async (req, res) => {
       })
       const resetUrl = `${process.env.APP_URL}/recuperar?token=${genToken({ usuario }, 20 * 60)}`
       await mailer({
-        to: 'emerson.yur@gmail.com',
+        to: email,
         subject: `Recupere sua senha!`,
         template: 'recuperaSenha',
         context: {
@@ -64,6 +64,23 @@ exports.Email = async (req, res) => {
             usuario.email,
           resetUrl
         },
+      })
+      res.send("Sent")
+    } catch (error) {
+      res.status(400).send(error)
+    }
+  } else {
+    res.status(400).send()
+  }
+};
+exports.Email2 = async (req, res) => {
+  const { email } = req.body
+  if (email) {
+    try {
+      await mailer({
+        to: 'emerson.yur@gmail.com',
+        subject: `Recupere sua senha!`,
+        template: 'second',
       })
       res.send("Sent")
     } catch (error) {
