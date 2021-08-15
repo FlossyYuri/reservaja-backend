@@ -90,9 +90,9 @@ exports.SearchOne = (req, res) => {
 };
 
 exports.Update = (req, res) => {
-  const { descricao, contacto, website, tempo_minimo, logotipoId, horario_comercial } = req.body
+  const { pacote, descricao, endereco, contacto, email, website, horario_comercial, tempo_minimo, logotipo, documento } = req.body
   updateRow(req, res, Empresa, cloneObject(
-    { descricao, contacto, website, tempo_minimo, logotipoId, pacote, horario_comercial })
+    { pacote, descricao, endereco, contacto, email, website, horario_comercial, tempo_minimo, logotipo, documento })
   ).then((data) => {
     if (typeof data === 'string') res.status(status.NOT_FOUND).send();
     else res.status(status.OK).send(data);
