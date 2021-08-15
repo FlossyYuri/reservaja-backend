@@ -52,7 +52,6 @@ exports.SearchPerMonth = (where = {}, month) => new Promise((resolve, reject) =>
   }
 });
 exports.Faturamento = async (req, res) => {
-  console.log('============>', req.params.empresaId)
   try {
     const total = await Movimento.sum('valor',
       {
@@ -72,7 +71,6 @@ exports.SearchTransactions = (req, res) => {
 
   const where = {}
   if (tipo) {
-    console.log(tipo)
     if (typeof tipo === 'string')
       where.tipo = tipo
     else
@@ -136,10 +134,8 @@ exports.SearchOne = (req, res) => {
 };
 
 exports.Responder = (id) => new Promise((resolve, reject) => {
-  console.log("ID to respond ===>", id)
   updateRow(undefined, undefined, Movimento, { respondida: 1 }, id)
     .then((movimento) => {
-      console.log(movimento)
       if (typeof movimento === 'string') resolve(false)
       else {
         resolve(true)

@@ -4,13 +4,12 @@ const { fetchPaginatedData, updateRow, cloneObject, getRow, defaultErrorHandler 
 const { Op, where } = require("sequelize");
 const Movimentos = require("../controllers/movimentos");
 const { pacotesObject, months } = require("../../data/constants");
+const Usuario = require("../models/usuario");
 
 exports.Insert = (req, res) => {
-  console.log('===========> ', req.body)
   const data = req.body;
   data.aprovado = false;
   data.usuarioId = req.user.id;
-  console.log('===========> ', data)
   Empresa.create(data)
     .then((empresa) => {
       if (empresa) {
@@ -28,15 +27,21 @@ exports.Insert = (req, res) => {
     .catch((error) => defaultErrorHandler(res, error));
 };
 exports.SearchAll = (req, res) => {
-  const { nome, tipo, pacote, aprovado, startDate, endDate } = req.query;
+  const { nome, tipo, pacote, aprovado, startDate, endDate, usuarioNome } = req.query;
 
   const where = {}
+  const usuarioWhere = {}
   if (req.user.funcao === 'vendedor') {
     where.usuarioId = req.user.id
   }
   if (nome) {
     where.nome = {
       [Op.substring]: nome
+    }
+  }
+  if (usuarioNome) {
+    usuarioWhere.nome = {
+      [Op.substring]: usuarioNome
     }
   }
   if (aprovado) {
@@ -55,11 +60,25 @@ exports.SearchAll = (req, res) => {
   } else if (endDate) {
     where.createdAt = { [Op.lte]: new Date(endDate) }
   }
-  fetchPaginatedData(req, res, Empresa, where)
+  include = {
+    model: Usuario,
+    attributes: {
+      exclude: ['senha']
+    },
+    where: usuarioWhere
+  }
+  fetchPaginatedData(req, res, Empresa, where, undefined, include)
 };
 exports.SearchOne = (req, res) => {
   const id = req.params.id;
-  Empresa.findByPk(id)
+  Empresa.findByPk(id, {
+    include: {
+      model: Usuario,
+      attributes: {
+        exclude: ['senha']
+      },
+    }
+  })
     .then((empresa) => {
       if (empresa) {
         res.status(status.OK).send(empresa);

@@ -41,7 +41,6 @@ exports.ME = async (req, res, next) => {
       usuarioId: req.user.id
     },
   })
-  console.log(req.user, receita)
   res.status(status.OK).send({ ...req.user.dataValues, empresas, receita });
 };
 exports.Email = async (req, res) => {
