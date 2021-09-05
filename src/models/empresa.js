@@ -68,11 +68,11 @@ const Empresa = sequelize.define("empresa", {
     }
   },
   documento: {
-    allowNull: false,
+    allowNull: true,
     type: Sequelize.STRING,
   },
   logotipo: {
-    allowNull: false,
+    allowNull: true,
     type: Sequelize.STRING,
   },
 });
