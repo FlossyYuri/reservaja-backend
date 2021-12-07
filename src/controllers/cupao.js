@@ -17,7 +17,6 @@ exports.Insert = (req, res) => {
     .then((cupao) => {
       if (cupao) {
         exports.Insert(req,res);
-        //res.send("achei um");
       } else {
         cup.codigo=codigo;
         Cupao.create(cup)

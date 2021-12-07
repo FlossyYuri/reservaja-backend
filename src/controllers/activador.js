@@ -37,13 +37,13 @@ exports.SearchAll = (req, res) => {
 
 exports.Update = (req, res) => {
   const id = req.params.id;
-  const { ativo, contacto } = req.body
+  const { nome, contacto } = req.body
 
-  Usuario.findByPk(id)
-    .then((usuario) => {
-      if (usuario) {
-        usuario
-          .update(cloneObject({ ativo, contacto }), {
+  Activador.findByPk(id)
+    .then((activador) => {
+      if (activador) {
+        activador
+          .update(cloneObject({ nome, contacto }), {
             where: { id },
           })
           .then(() => {
@@ -59,10 +59,10 @@ exports.Update = (req, res) => {
 
 exports.Delete = (req, res) => {
   const { id } = req.params;
-  Usuario.findByPk(id)
-    .then((usuario) => {
-      if (usuario) {
-        usuario
+  Activador.findByPk(id)
+    .then((activador) => {
+      if (activador) {
+        activador
           .destroy({
             where: { id },
           })
