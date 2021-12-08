@@ -16,7 +16,7 @@ router.use("/dashboard", authenticateToken, dashboard);
 router.use("/auth", auth);
 //Rotas para Activadores, Clientes e Cupoes.
 router.use("/activadores", authenticateToken, activadores);
-router.use("/cupoes", authenticateToken, cupoes);
+router.use("/cupoes", cupoes);
 
 
 
