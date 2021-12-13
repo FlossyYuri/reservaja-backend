@@ -10,6 +10,8 @@ const Usuario = require("./src/models/usuario");
 const Movimento = require("./src/models/movimento");
 const app = express();
 const routes = require("./src/routes");
+const Activador = require("./src/models/activador");
+const Cupao = require("./src/models/cupao");
 
 Usuario.hasMany(Empresa);
 Empresa.belongsTo(Usuario)
@@ -21,6 +23,16 @@ Usuario.hasMany(Movimento, {
 Movimento.belongsTo(Usuario)
 Empresa.hasMany(Movimento);
 Movimento.belongsTo(Empresa)
+
+//Relacionamento entre Usuario e Activador
+Usuario.hasMany(Activador);
+Activador.belongsTo(Usuario);
+
+//Relacionamento entre entidade activador e cupao
+Activador.hasMany(Cupao);
+Cupao.belongsTo(Activador);
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
