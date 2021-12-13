@@ -19,6 +19,11 @@ const Activador = sequelize.define("activador", {
     allowNull: false,
     type: Sequelize.STRING,
   },
+
+  empresa: {
+    allowNull: false,
+    type: Sequelize.STRING,
+  },
   
   ativo: {
     allowNull: false,

@@ -1,10 +1,10 @@
 const Usuario = require("../models/usuario");
 const status = require("http-status");
-const { fetchPaginatedData, defaultErrorHandler, cloneObject } = require("../utils");
 const { Op } = require("sequelize");
 const Empresa = require("../models/empresa");
 const Cupao = require("../models/cupao");
 const Activador = require("../models/activador");
+const { fetchPaginatedData, updateRow, cloneObject, getRow, defaultErrorHandler } = require("../utils")
 
 
 exports.Insert = (req, res) => {
@@ -17,6 +17,7 @@ exports.Insert = (req, res) => {
     .then((cupao) => {
       if (cupao) {
         exports.Insert(req,res);
+        //res.send("achei um");
       } else {
         cup.codigo=codigo;
         Cupao.create(cup)
@@ -73,7 +74,7 @@ exports.validate = (req, res) => {
     const codigo = ("RJ"+numero);
     return codigo;
   };
-
+/*
   exports.SearchAll = (req, res) => {
     const { nome, quantidade, validacoes} = req.query;
   
@@ -89,12 +90,60 @@ exports.validate = (req, res) => {
       where.validacoes = validacoes
     }
     include = [{ model: Usuario,attributes:{exclude: ['senha']} }, 
-   
+    
     {model: Cupao,where: activadorWhere}, ]
     fetchPaginatedData(req, res, Activador,where, undefined, include)
   
-  };
+  };*/
   //Metodo para indicar o pagamento;
+
+  
+  exports.SearchAll = (req, res) => {
+    const {contacto, usuarioNome, activadorNome,pagamento} = req.query;
+    const where = {}
+    const activadorWhere = {}
+    const usuarioWhere = {}
+    if (req.user.funcao === 'vendedor') {
+      usuarioWhere.id = req.user.id
+    }
+    
+    if (activadorNome) {
+      activadorWhere.nome = {
+        [Op.substring]: activadorNome
+      }
+    }
+
+    if (pagamento) {
+      where.pagamento = pagamento
+    }
+    
+    if (usuarioNome) {
+      usuarioWhere.nome = {
+        [Op.substring]: usuarioNome
+      }
+    }
+
+    if (contacto) {
+      where.contacto = {
+        [Op.substring]: contacto
+      }
+    } 
+
+    include = [{
+      model: Activador,
+      where:activadorWhere,
+      include:[{model:Usuario,where:usuarioWhere}]
+      
+    }]
+
+
+    //include = [{ model: Activador,include:[Usuario]}]
+    fetchPaginatedData(req, res, Cupao,where, undefined, include)
+  
+  };
+
+
+  //
   exports.update = (req, res) => {
     const id = req.params.id;
     let { pagamento} = req.body

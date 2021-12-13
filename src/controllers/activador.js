@@ -20,11 +20,19 @@ exports.Insert = (req, res) => {
 };
 
 exports.SearchAll = (req, res) => {
-  const { nome} = req.query;
+  const {nome,numero} = req.query;
 
   const where = {}
   const usuarioWhere = {}
-  
+  if (req.user.funcao === 'vendedor') {
+    where.usuarioId = req.user.id
+  }
+  if (nome) {
+    where.nome = {
+      [Op.substring]: nome
+    }
+  }
+ 
   include = {
     model: Usuario,
     attributes: {
@@ -37,13 +45,13 @@ exports.SearchAll = (req, res) => {
 
 exports.Update = (req, res) => {
   const id = req.params.id;
-  const { nome, contacto } = req.body
+  const { ativo, contacto } = req.body
 
-  Activador.findByPk(id)
-    .then((activador) => {
-      if (activador) {
-        activador
-          .update(cloneObject({ nome, contacto }), {
+  Usuario.findByPk(id)
+    .then((usuario) => {
+      if (usuario) {
+        usuario
+          .update(cloneObject({ ativo, contacto }), {
             where: { id },
           })
           .then(() => {
@@ -59,10 +67,10 @@ exports.Update = (req, res) => {
 
 exports.Delete = (req, res) => {
   const { id } = req.params;
-  Activador.findByPk(id)
-    .then((activador) => {
-      if (activador) {
-        activador
+  Usuario.findByPk(id)
+    .then((usuario) => {
+      if (usuario) {
+        usuario
           .destroy({
             where: { id },
           })
